@@ -1,2 +1,0 @@
-"""ai-composer platform package."""
-
