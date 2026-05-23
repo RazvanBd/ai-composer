@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AiComposer.Maui.ViewModels"
+             xmlns:models="clr-namespace:AiComposer.Maui.Models"
+             x:Class="AiComposer.Maui.Views.TicketsPage"
+             x:DataType="vm:TicketsViewModel"
+             Title="Tickets">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Toolbar -->
+        <HorizontalStackLayout Grid.Row="0" Padding="12,8" Spacing="8">
+            <Button Text="Load Tickets"
+                    Command="{Binding LoadTicketsCommand}"
+                    BackgroundColor="#2563EB"
+                    TextColor="White"
+                    CornerRadius="6" />
+            <Button Text="Run Selected"
+                    Command="{Binding RunSelectedTicketCommand}"
+                    BackgroundColor="#16A34A"
+                    TextColor="White"
+                    CornerRadius="6" />
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+        </HorizontalStackLayout>
+
+        <!-- Ticket list -->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Tickets}"
+                        SelectionMode="Single"
+                        SelectedItem="{Binding SelectedTicket}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:TicketItem">
+                    <Grid Padding="12,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Label Grid.Column="0" Text="{Binding Id}"
+                               FontAttributes="Bold" FontSize="13" TextColor="#374151" />
+                        <Label Grid.Column="1" Text="{Binding Title}"
+                               FontSize="13" LineBreakMode="TailTruncation" />
+                        <Label Grid.Column="2" Text="{Binding State}"
+                               FontSize="11" TextColor="White"
+                               BackgroundColor="#6B7280"
+                               Padding="6,2" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Selected ticket info bar -->
+        <Label Grid.Row="2" Padding="12,8"
+               Text="{Binding SelectedTicket.Id, StringFormat='Selected: {0}'}"
+               FontSize="12" TextColor="Gray" />
+
+    </Grid>
+
+</ContentPage>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AiComposer.Maui.ViewModels"
+             xmlns:converters="clr-namespace:AiComposer.Maui.Converters"
+             x:Class="AiComposer.Maui.Views.RunConsolePage"
+             x:DataType="vm:RunConsoleViewModel"
+             Title="Run Console">
+
+    <ContentPage.Resources>
+        <converters:BoolToRunStatusConverter x:Key="BoolToRunStatusConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Controls -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" Padding="12,8" ColumnSpacing="8">
+            <Entry Grid.Column="0"
+                   Placeholder="Ticket ID (e.g. T-101)"
+                   Text="{Binding TicketId}"
+                   ClearButtonVisibility="WhileEditing" />
+            <Button Grid.Column="1"
+                    Text="▶ Start"
+                    Command="{Binding StartRunCommand}"
+                    BackgroundColor="#16A34A"
+                    TextColor="White"
+                    CornerRadius="6" />
+            <Button Grid.Column="2"
+                    Text="■ Stop"
+                    Command="{Binding StopRunCommand}"
+                    BackgroundColor="#DC2626"
+                    TextColor="White"
+                    CornerRadius="6" />
+            <Button Grid.Column="3"
+                    Text="Clear"
+                    Command="{Binding ClearOutputCommand}"
+                    BackgroundColor="#6B7280"
+                    TextColor="White"
+                    CornerRadius="6" />
+        </Grid>
+
+        <!-- Live output log -->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding OutputLines}"
+                        BackgroundColor="#1E1E1E">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <Label Text="{Binding .}"
+                           FontFamily="Courier New"
+                           FontSize="12"
+                           TextColor="#D4D4D4"
+                           Padding="12,2" />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Status bar -->
+        <HorizontalStackLayout Grid.Row="2" Padding="12,6" Spacing="8">
+            <ActivityIndicator IsRunning="{Binding IsRunning}" IsVisible="{Binding IsRunning}" />
+            <Label Text="{Binding IsRunning, Converter={StaticResource BoolToRunStatusConverter}}"
+                   FontSize="12" TextColor="Gray" VerticalOptions="Center" />
+        </HorizontalStackLayout>
+
+    </Grid>
+
+</ContentPage>

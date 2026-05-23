@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AiComposer.Maui.ViewModels"
+             xmlns:models="clr-namespace:AiComposer.Maui.Models"
+             x:Class="AiComposer.Maui.Views.WorkspaceViewerPage"
+             x:DataType="vm:WorkspaceViewerViewModel"
+             Title="Workspace Viewer">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Toolbar -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Padding="12,8" ColumnSpacing="8">
+            <Entry Grid.Column="0"
+                   Placeholder="Ticket ID"
+                   Text="{Binding TicketId}"
+                   ClearButtonVisibility="WhileEditing" />
+            <Button Grid.Column="1"
+                    Text="Load Files"
+                    Command="{Binding LoadFilesCommand}"
+                    BackgroundColor="#2563EB"
+                    TextColor="White"
+                    CornerRadius="6" />
+            <ActivityIndicator Grid.Column="2"
+                               IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}" />
+        </Grid>
+
+        <!-- File tree + preview -->
+        <Grid Grid.Row="1" ColumnDefinitions="280,*">
+
+            <!-- File list -->
+            <CollectionView Grid.Column="0"
+                            ItemsSource="{Binding GeneratedFiles}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedFile}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:GeneratedFileItem">
+                        <VerticalStackLayout Padding="12,8">
+                            <Label Text="{Binding RelativePath}"
+                                   FontSize="13"
+                                   LineBreakMode="MiddleTruncation" />
+                            <Label Text="{Binding SizeBytes, StringFormat='{0} bytes'}"
+                                   FontSize="11"
+                                   TextColor="Gray" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- File content preview -->
+            <ScrollView Grid.Column="1" BackgroundColor="#1E1E1E" Padding="12">
+                <Editor Text="{Binding FileContent}"
+                        IsReadOnly="True"
+                        FontFamily="Courier New"
+                        FontSize="12"
+                        TextColor="#D4D4D4"
+                        BackgroundColor="Transparent"
+                        AutoSize="TextChanges"
+                        Placeholder="Select a file to view its content." />
+            </ScrollView>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

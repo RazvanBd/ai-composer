@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:views="clr-namespace:AiComposer.Maui.Views"
+       x:Class="AiComposer.Maui.AppShell"
+       Shell.NavBarIsVisible="True"
+       FlyoutBehavior="Flyout"
+       Title="AiComposer">
+
+    <Shell.FlyoutHeader>
+        <VerticalStackLayout BackgroundColor="#1E3A5F" Padding="16,32,16,16">
+            <Label Text="AiComposer"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="White" />
+            <Label Text="AI Orchestration Studio"
+                   FontSize="12"
+                   TextColor="#93C5FD" />
+        </VerticalStackLayout>
+    </Shell.FlyoutHeader>
+
+    <!-- Dashboard -->
+    <FlyoutItem Title="Dashboard" Icon="dashboard.png" Route="dashboard">
+        <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" />
+    </FlyoutItem>
+
+    <!-- Artifacts Explorer -->
+    <FlyoutItem Title="Artifacts Explorer" Icon="artifacts.png" Route="artifacts">
+        <ShellContent ContentTemplate="{DataTemplate views:ArtifactsExplorerPage}" />
+    </FlyoutItem>
+
+    <!-- Tickets -->
+    <FlyoutItem Title="Tickets" Icon="tickets.png" Route="tickets">
+        <ShellContent ContentTemplate="{DataTemplate views:TicketsPage}" />
+    </FlyoutItem>
+
+    <!-- Run Console -->
+    <FlyoutItem Title="Run Console" Icon="console.png" Route="runconsole">
+        <ShellContent ContentTemplate="{DataTemplate views:RunConsolePage}" />
+    </FlyoutItem>
+
+    <!-- Workspace Viewer -->
+    <FlyoutItem Title="Workspace Viewer" Icon="workspace.png" Route="workspaceviewer">
+        <ShellContent ContentTemplate="{DataTemplate views:WorkspaceViewerPage}" />
+    </FlyoutItem>
+
+    <!-- Settings -->
+    <FlyoutItem Title="Settings" Icon="settings.png" Route="settings">
+        <ShellContent ContentTemplate="{DataTemplate views:SettingsPage}" />
+    </FlyoutItem>
+
+</Shell>

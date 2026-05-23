@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/AiComposer.Cli/AiComposer.Cli.csproj" />
     <Project Path="src/AiComposer.Core/AiComposer.Core.csproj" />
+    <Project Path="src/AiComposer.Maui/AiComposer.Maui.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/AiComposer.Tests/AiComposer.Tests.csproj" />
