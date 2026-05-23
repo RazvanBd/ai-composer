@@ -16,6 +16,7 @@ public sealed partial class TicketsViewModel : ObservableObject
     private ObservableCollection<TicketItem> _tickets = [];
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RunSelectedTicketCommand))]
     private TicketItem? _selectedTicket;
 
     [ObservableProperty]
@@ -44,13 +45,21 @@ public sealed partial class TicketsViewModel : ObservableObject
         }
     }
 
-    /// <summary>Starts a run for the currently selected ticket.</summary>
+    /// <summary>Starts a run for the currently selected ticket and navigates to the Run Console.</summary>
     [RelayCommand(CanExecute = nameof(CanRunSelectedTicket))]
     private async Task RunSelectedTicketAsync()
     {
         if (SelectedTicket is null) return;
+
         await _runService.StartRunAsync(SelectedTicket.Id);
+
+        var ticketTitle = Uri.EscapeDataString(SelectedTicket.Title);
+        await Shell.Current.GoToAsync(
+            $"//runconsole?ticketId={SelectedTicket.Id}&ticketTitle={ticketTitle}");
     }
 
-    private bool CanRunSelectedTicket() => SelectedTicket is not null && !_runService.IsRunning;
+    private bool CanRunSelectedTicket()
+        => SelectedTicket is not null
+        && string.Equals(SelectedTicket.State, "ready", StringComparison.OrdinalIgnoreCase)
+        && !_runService.IsRunning;
 }

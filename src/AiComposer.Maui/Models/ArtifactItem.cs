@@ -17,4 +17,7 @@ public sealed class ArtifactItem
 
     /// <summary>Raw Markdown content of the artifact file.</summary>
     public string Content { get; init; } = string.Empty;
+
+    /// <summary>Validation status: Valid, Invalid, or Unknown.</summary>
+    public string ValidationStatus { get; set; } = "Unknown";
 }

@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using AiComposer.Maui.ViewModels;
 
 namespace AiComposer.Maui.Views;
@@ -10,5 +11,31 @@ public partial class RunConsolePage : ContentPage
     {
         InitializeComponent();
         BindingContext = viewModel;
+    }
+
+    /// <inheritdoc/>
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        if (BindingContext is RunConsoleViewModel vm)
+            vm.OutputLines.CollectionChanged += OnOutputLinesChanged;
+    }
+
+    /// <inheritdoc/>
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (BindingContext is RunConsoleViewModel vm)
+            vm.OutputLines.CollectionChanged -= OnOutputLinesChanged;
+    }
+
+    private void OnOutputLinesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action != NotifyCollectionChangedAction.Add) return;
+        if (BindingContext is not RunConsoleViewModel vm) return;
+
+        var last = vm.OutputLines.LastOrDefault();
+        if (last is not null)
+            LogsCollectionView.ScrollTo(last, animate: false);
     }
 }
