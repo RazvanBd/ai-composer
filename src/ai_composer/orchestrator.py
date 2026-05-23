@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
 from pathlib import Path
 from uuid import uuid4
 
@@ -67,7 +68,7 @@ class Orchestrator:
             ticket_path = out_root / node.id
             ticket_path.mkdir(parents=True, exist_ok=True)
             (ticket_path / "context.json").write_text(
-                json.dumps(context.__dict__, ensure_ascii=False, indent=2), encoding="utf-8"
+                json.dumps(asdict(context), ensure_ascii=False, indent=2), encoding="utf-8"
             )
             trace_id = str(uuid4())
             self.trace_logger.log(
@@ -84,4 +85,3 @@ class Orchestrator:
             )
             self.state_store.transition(node.id, TicketState.WAITING_FOR_REVIEW)
         return ticket_ids
-
