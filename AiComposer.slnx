@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AiComposer.Cli/AiComposer.Cli.csproj" />
+    <Project Path="src/AiComposer.Core/AiComposer.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AiComposer.Tests/AiComposer.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,11 @@
+# Generated state / output
+.state/
+output/
+
+# .NET build artifacts
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
