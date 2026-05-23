@@ -9,7 +9,7 @@ public sealed class AppSettings
     /// <summary>Path to the output folder where generated files are written.</summary>
     public string OutputPath { get; set; } = string.Empty;
 
-    /// <summary>AI provider: deepseek, copilot.</summary>
+    /// <summary>Configured AI provider identifier (deepseek, copilot, or empty for none).</summary>
     public string AiProvider { get; set; } = "deepseek";
 
     /// <summary>Model name for the selected AI provider.</summary>

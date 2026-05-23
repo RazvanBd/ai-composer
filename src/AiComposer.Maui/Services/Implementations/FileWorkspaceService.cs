@@ -8,16 +8,14 @@ namespace AiComposer.Maui.Services.Implementations;
 /// </summary>
 public sealed class FileWorkspaceService : IWorkspaceService
 {
-    private readonly ISettingsService _settingsService;
     private string? _currentWorkspacePath;
 
     /// <inheritdoc/>
     public string? CurrentWorkspacePath => _currentWorkspacePath;
 
-    /// <summary>Initialises <see cref="FileWorkspaceService"/> with the required settings service.</summary>
-    public FileWorkspaceService(ISettingsService settingsService)
+    /// <summary>Initialises <see cref="FileWorkspaceService"/>.</summary>
+    public FileWorkspaceService()
     {
-        _settingsService = settingsService;
     }
 
     /// <inheritdoc/>
@@ -27,9 +25,6 @@ public sealed class FileWorkspaceService : IWorkspaceService
         if (result.IsSuccessful && !string.IsNullOrWhiteSpace(result.Folder?.Path))
         {
             _currentWorkspacePath = result.Folder.Path;
-            var settings = await _settingsService.LoadAsync();
-            settings.WorkspacePath = _currentWorkspacePath;
-            await _settingsService.SaveAsync(settings);
             return _currentWorkspacePath;
         }
 
