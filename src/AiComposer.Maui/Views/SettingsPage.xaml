@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AiComposer.Maui.ViewModels"
+             x:Class="AiComposer.Maui.Views.SettingsPage"
+             x:DataType="vm:SettingsViewModel"
+             Title="Settings">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16" MaximumWidthRequest="600">
+
+            <Label Text="Settings"
+                   FontSize="24"
+                   FontAttributes="Bold" />
+
+            <!-- Workspace section -->
+            <Label Text="Workspace" FontSize="16" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Label Text="Artifacts folder path" FontSize="12" TextColor="Gray" />
+            <Entry Placeholder="/path/to/artifacts"
+                   Text="{Binding WorkspacePath}" />
+
+            <Label Text="Output folder path" FontSize="12" TextColor="Gray" />
+            <Entry Placeholder="/path/to/output"
+                   Text="{Binding OutputPath}" />
+
+            <!-- AI provider section -->
+            <Label Text="AI Provider" FontSize="16" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Label Text="Provider (deepseek / copilot)" FontSize="12" TextColor="Gray" />
+            <Entry Placeholder="deepseek"
+                   Text="{Binding AiProvider}" />
+
+            <Label Text="Model name" FontSize="12" TextColor="Gray" />
+            <Entry Placeholder="e.g. gpt-4o"
+                   Text="{Binding AiModel}" />
+
+            <!-- CLI section -->
+            <Label Text="CLI Integration" FontSize="16" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Label Text="Path to AiComposer.Cli executable" FontSize="12" TextColor="Gray" />
+            <Entry Placeholder="/path/to/AiComposer.Cli"
+                   Text="{Binding CliExecutablePath}" />
+
+            <HorizontalStackLayout Spacing="12">
+                <CheckBox IsChecked="{Binding LiveOutput}" />
+                <Label Text="Stream live output during runs" VerticalOptions="Center" FontSize="13" />
+            </HorizontalStackLayout>
+
+            <!-- Actions -->
+            <HorizontalStackLayout Spacing="12" Margin="0,16,0,0">
+                <Button Text="Save Settings"
+                        Command="{Binding SaveSettingsCommand}"
+                        BackgroundColor="#2563EB"
+                        TextColor="White"
+                        CornerRadius="8" />
+                <ActivityIndicator IsRunning="{Binding IsSaving}" IsVisible="{Binding IsSaving}" />
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

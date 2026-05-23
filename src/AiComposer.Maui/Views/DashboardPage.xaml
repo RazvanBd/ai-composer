@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AiComposer.Maui.ViewModels"
+             x:Class="AiComposer.Maui.Views.DashboardPage"
+             x:DataType="vm:DashboardViewModel"
+             Title="Dashboard">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+
+            <Label Text="AiComposer Dashboard"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <Label Text="{Binding WorkspacePath}"
+                   FontSize="14"
+                   TextColor="Gray"
+                   HorizontalOptions="Center" />
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}"
+                               HorizontalOptions="Center" />
+
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                <Frame Grid.Row="0" Grid.Column="0" BackgroundColor="#EFF6FF" CornerRadius="8" Padding="16">
+                    <VerticalStackLayout>
+                        <Label Text="Artifacts" FontSize="12" TextColor="Gray" />
+                        <Label Text="{Binding ArtifactCount}" FontSize="32" FontAttributes="Bold" TextColor="#2563EB" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame Grid.Row="0" Grid.Column="1" BackgroundColor="#F0FDF4" CornerRadius="8" Padding="16">
+                    <VerticalStackLayout>
+                        <Label Text="Tickets" FontSize="12" TextColor="Gray" />
+                        <Label Text="{Binding TicketCount}" FontSize="32" FontAttributes="Bold" TextColor="#16A34A" />
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <Button Text="Open Workspace"
+                    Command="{Binding OpenWorkspaceCommand}"
+                    BackgroundColor="#2563EB"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Margin="0,8,0,0" />
+
+            <Button Text="Refresh"
+                    Command="{Binding RefreshCommand}"
+                    BackgroundColor="#6B7280"
+                    TextColor="White"
+                    CornerRadius="8" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
