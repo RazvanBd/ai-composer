@@ -11,6 +11,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 {
     private readonly ISettingsService _settingsService;
     private readonly IWorkspaceService _workspaceService;
+    private readonly ISecureStorageService _secureStorageService;
 
     [ObservableProperty]
     private string _workspacePath = string.Empty;
@@ -28,15 +29,6 @@ public sealed partial class SettingsViewModel : ObservableObject
     private string _apiKey = string.Empty;
 
     [ObservableProperty]
-    private bool _autoApprove;
-
-    [ObservableProperty]
-    private int _timeoutMinutes = 30;
-
-    [ObservableProperty]
-    private int _maxRetries = 3;
-
-    [ObservableProperty]
     private bool _isSaving;
 
     [ObservableProperty]
@@ -47,13 +39,14 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     /// <summary>Supported AI providers available in Settings.</summary>
     public IReadOnlyList<string> Providers { get; } =
-        ["OpenAI", "Azure OpenAI", "Anthropic", "Local"];
+        ["DeepSeek", "Copilot", "Local"];
 
     /// <summary>Initialises <see cref="SettingsViewModel"/>.</summary>
-    public SettingsViewModel(ISettingsService settingsService, IWorkspaceService workspaceService)
+    public SettingsViewModel(ISettingsService settingsService, IWorkspaceService workspaceService, ISecureStorageService secureStorageService)
     {
         _settingsService = settingsService;
         _workspaceService = workspaceService;
+        _secureStorageService = secureStorageService;
         _ = LoadSettingsAsync();
     }
 
@@ -66,10 +59,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         OutputPath = settings.OutputPath;
         SelectedProvider = ToProviderLabel(settings.AiProvider);
         Model = settings.AiModel;
-        ApiKey = settings.ApiKey;
-        AutoApprove = settings.AutoApprove;
-        TimeoutMinutes = Math.Max(1, settings.TimeoutMinutes);
-        MaxRetries = Math.Max(0, settings.MaxRetries);
+        ApiKey = await _secureStorageService.GetApiKeyAsync();
         HasSavedConfirmation = false;
     }
 
@@ -85,12 +75,9 @@ public sealed partial class SettingsViewModel : ObservableObject
             settings.OutputPath = OutputPath;
             settings.AiProvider = ToProviderValue(SelectedProvider);
             settings.AiModel = Model;
-            settings.ApiKey = ApiKey;
-            settings.AutoApprove = AutoApprove;
-            settings.TimeoutMinutes = Math.Max(1, TimeoutMinutes);
-            settings.MaxRetries = Math.Max(0, MaxRetries);
 
             await _settingsService.SaveAsync(settings);
+            await _secureStorageService.SetApiKeyAsync(ApiKey);
             SaveConfirmationMessage = $"Settings saved at {DateTime.Now:HH:mm:ss}.";
             HasSavedConfirmation = true;
         }
@@ -100,7 +87,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
     }
 
-    /// <summary>Opens a folder picker and sets the workspace path.</summary>
+    /// <summary>Opens a folder picker and sets the workspace path without persisting.</summary>
     [RelayCommand]
     private async Task BrowseWorkspaceAsync()
     {
@@ -118,25 +105,34 @@ public sealed partial class SettingsViewModel : ObservableObject
             OutputPath = result.Folder.Path;
     }
 
-    /// <summary>Restores form values from the currently persisted settings.</summary>
+    /// <summary>Restores form values to their defaults.</summary>
     [RelayCommand]
-    private Task ResetAsync() => LoadSettingsAsync();
+    private async Task ResetAsync()
+    {
+        var defaults = new AppSettings();
+        WorkspacePath = defaults.WorkspacePath;
+        OutputPath = defaults.OutputPath;
+        SelectedProvider = ToProviderLabel(defaults.AiProvider);
+        Model = defaults.AiModel;
+        ApiKey = string.Empty;
+        await _secureStorageService.RemoveApiKeyAsync();
+        await _settingsService.SaveAsync(defaults);
+        HasSavedConfirmation = false;
+    }
 
     private static string ToProviderLabel(string provider) => provider.ToLowerInvariant() switch
     {
-        "openai" => "OpenAI",
-        "azure-openai" => "Azure OpenAI",
-        "anthropic" => "Anthropic",
-        "local" => "Local",
-        _ => "OpenAI",
+        "deepseek" => "DeepSeek",
+        "copilot" => "Copilot",
+        "local" or "" => "Local",
+        _ => "DeepSeek",
     };
 
     private static string ToProviderValue(string providerLabel) => providerLabel switch
     {
-        "OpenAI" => "openai",
-        "Azure OpenAI" => "azure-openai",
-        "Anthropic" => "anthropic",
-        "Local" => "local",
-        _ => "openai",
+        "DeepSeek" => "deepseek",
+        "Copilot" => "copilot",
+        "Local" => "",
+        _ => "deepseek",
     };
 }

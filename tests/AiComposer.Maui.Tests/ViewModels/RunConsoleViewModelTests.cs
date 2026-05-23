@@ -20,9 +20,15 @@ public sealed class RunConsoleViewModelTests
         public event EventHandler<int>? RunCompleted;
 
         public bool IsRunning { get; set; }
+        public int CompletionExitCode { get; set; }
+        public bool AutoComplete { get; set; }
 
-        public Task StartRunAsync(string ticketId, CancellationToken ct = default) =>
-            Task.CompletedTask;
+        public Task StartRunAsync(string ticketId, CancellationToken ct = default)
+        {
+            if (AutoComplete)
+                RunCompleted?.Invoke(this, CompletionExitCode);
+            return Task.CompletedTask;
+        }
 
         public void StopRun() { }
 
@@ -357,46 +363,19 @@ public sealed class RunConsoleViewModelTests
     [Fact]
     public async Task RunAllReady_SetsCorrectCountOfReadyTickets()
     {
-        var (vm, _, tickets, _, _) = Create();
+        var (vm, run, tickets, _, _) = Create();
+        run.AutoComplete = true;
+        run.CompletionExitCode = 0;
         tickets.Tickets =
         [
             new TicketItem { Id = "T-1", Title = "Alpha", State = "ready" },
-            new TicketItem { Id = "T-2", Title = "Beta", State = "ready" },
-            new TicketItem { Id = "T-3", Title = "Gamma", State = "draft" },  // not ready
-        ];
-
-        // We just want to check TotalReadyTickets, which is set before the run loop.
-        // Because ExecuteRunAsync needs MainThread, cancel via stop requested after init.
-        // Instead, use zero-ready path via state filtering:
-        // Actually the run loop calls ExecuteRunAsync which hits MainThread; so use an
-        // approach that avoids executing the actual loop:
-        // Re-filter: only T-1 and T-2 are "ready" so TotalReadyTickets should be 2.
-        // The assignment happens before any MainThread call in RunAllReadyAsync.
-        // We can abort via _stopRequested by stopping immediately.
-        // Since we can't call StopRun easily mid-async without a second thread,
-        // let's observe the side-effect on TotalReadyTickets from the method's
-        // early initialisation before the first run starts.
-        // Note: ExecuteRunAsync returns Idle immediately when ticketId is empty —
-        // if we don't set TicketId the method just returns.
-        // The cleanest approach: intercept by providing tickets all with State=""
-        // which are NOT "ready" so the early-return path fires after setting TotalReadyTickets.
-
-        tickets.Tickets =
-        [
-            new TicketItem { Id = "T-1", Title = "Alpha", State = "READY" }, // case-insensitive match
             new TicketItem { Id = "T-2", Title = "Beta", State = "Ready" },
             new TicketItem { Id = "T-3", Title = "Gamma", State = "draft" },
         ];
-        // RunAllReadyAsync: TotalReadyTickets = readyTickets.Count is set BEFORE
-        // the early-return check of readyTickets.Count == 0. So even if Count > 0,
-        // we won't have a clean test without MainThread unless we use the 0 path.
-        // Reset to 0-ready for a safe test.
-        tickets.Tickets = [];
 
         await vm.RunAllReadyCommand.ExecuteAsync(null);
 
-        // For 0 ready tickets the count is set to 0 AFTER LoadTicketsAsync.
-        Assert.Equal(0, vm.TotalReadyTickets);
+        Assert.Equal(2, vm.TotalReadyTickets);
     }
 
     // ---------------------------------------------------------------------------
@@ -521,21 +500,19 @@ public sealed class RunConsoleViewModelTests
     [Fact]
     public async Task RunAllReady_ReadyFilterIsCaseInsensitive_UpperCaseReady()
     {
-        var (vm, _, tickets, _, _) = Create();
-        // All uppercase "READY" — should still be counted as ready.
-        // Use only READY-state tickets so the batch proceeds but
-        // since ExecuteRunAsync requires MainThread and StartRunAsync in fake
-        // returns immediately (no RunCompleted fired), we'll observe
-        // the TotalReadyTickets set before the loop.
-        // For this test, provide 0 non-ready tickets only so we hit the early-return:
+        var (vm, run, tickets, _, _) = Create();
+        run.AutoComplete = true;
+        run.CompletionExitCode = 0;
         tickets.Tickets =
         [
-            new TicketItem { Id = "T-99", Title = "Upper", State = "draft" }
+            new TicketItem { Id = "T-98", Title = "Lower", State = "ready" },
+            new TicketItem { Id = "T-99", Title = "Upper", State = "READY" },
         ];
 
         await vm.RunAllReadyCommand.ExecuteAsync(null);
 
-        Assert.Equal("No ready tickets found.", vm.BatchRunSummary);
+        Assert.Equal(2, vm.TotalReadyTickets);
+        Assert.Contains("2 completed", vm.BatchRunSummary);
     }
 
     // ---------------------------------------------------------------------------

@@ -243,8 +243,16 @@ public sealed partial class RunConsoleViewModel : ObservableObject, IQueryAttrib
         AuditAppliedFilesCount = 0;
         SelectedAppliedFile = null;
 
-        var filesBeforeRun = (await _outputService.ListGeneratedFilesAsync(ticketId))
-            .ToDictionary(f => f.RelativePath, f => f.LastModified);
+        Dictionary<string, DateTimeOffset> filesBeforeRun;
+        try
+        {
+            filesBeforeRun = (await _outputService.ListGeneratedFilesAsync(ticketId))
+                .ToDictionary(f => f.RelativePath, f => f.LastModified);
+        }
+        catch (Exception)
+        {
+            filesBeforeRun = new Dictionary<string, DateTimeOffset>();
+        }
 
         OutputLines.Clear();
         AppliedFiles.Clear();
@@ -266,7 +274,16 @@ public sealed partial class RunConsoleViewModel : ObservableObject, IQueryAttrib
             var endedAt = DateTimeOffset.Now;
             AuditEndTimestamp = endedAt.ToString("yyyy-MM-dd HH:mm:ss");
             AuditDuration = $"{(endedAt - startedAt).TotalSeconds:F1}s";
-            await RefreshAppliedFilesAndAuditAsync(ticketId, filesBeforeRun, startedAt, endedAt, ticketTitle);
+
+            try
+            {
+                await RefreshAppliedFilesAndAuditAsync(ticketId, filesBeforeRun, startedAt, endedAt, ticketTitle);
+            }
+            catch (Exception)
+            {
+                // Best-effort: enrichment failure should not fault the command or abort batch.
+            }
+
             AuditFinalStatus = RunStatus.ToString();
             _activeRunCompletionSource = null;
         }
@@ -307,6 +324,7 @@ public sealed partial class RunConsoleViewModel : ObservableObject, IQueryAttrib
             {
                 var latestRunDirectory = new DirectoryInfo(runsRoot)
                     .EnumerateDirectories()
+                    .Where(dir => dir.LastWriteTimeUtc >= startedAt.UtcDateTime)
                     .OrderByDescending(dir => dir.LastWriteTimeUtc)
                     .FirstOrDefault();
 
@@ -314,7 +332,7 @@ public sealed partial class RunConsoleViewModel : ObservableObject, IQueryAttrib
                 {
                     var auditFile = Path.Combine(latestRunDirectory.FullName, "agent-request.json");
                     if (File.Exists(auditFile))
-                        PopulateAuditFromFile(auditFile);
+                        await PopulateAuditFromFileAsync(auditFile);
                 }
             }
         }
@@ -325,11 +343,12 @@ public sealed partial class RunConsoleViewModel : ObservableObject, IQueryAttrib
         AuditTicket = string.IsNullOrWhiteSpace(ticketTitle) ? ticketId : $"{ticketId} — {ticketTitle}";
     }
 
-    private void PopulateAuditFromFile(string auditFilePath)
+    private async Task PopulateAuditFromFileAsync(string auditFilePath)
     {
         try
         {
-            using var document = JsonDocument.Parse(File.ReadAllText(auditFilePath));
+            var json = await File.ReadAllTextAsync(auditFilePath);
+            using var document = JsonDocument.Parse(json);
             var root = document.RootElement;
 
             if (root.TryGetProperty("createdAt", out var createdAtElement))

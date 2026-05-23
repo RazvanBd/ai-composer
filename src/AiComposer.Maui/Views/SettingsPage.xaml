@@ -50,32 +50,6 @@
                    IsPassword="True"
                    Text="{Binding ApiKey}" />
 
-            <!-- Run policies section -->
-            <Label Text="Run Policies" FontSize="16" FontAttributes="Bold" Margin="0,8,0,0" />
-            <Grid ColumnDefinitions="*,Auto" Padding="0,4,0,0">
-                <Label Grid.Column="0"
-                       Text="Auto-approve"
-                       VerticalOptions="Center" />
-                <Switch Grid.Column="1"
-                        IsToggled="{Binding AutoApprove}" />
-            </Grid>
-
-            <Label Text="{Binding TimeoutMinutes, StringFormat='Timeout per run: {0} minute(s)'}"
-                   FontSize="12"
-                   TextColor="Gray" />
-            <Stepper Minimum="1"
-                     Maximum="180"
-                     Increment="1"
-                     Value="{Binding TimeoutMinutes}" />
-
-            <Label Text="{Binding MaxRetries, StringFormat='Max retries: {0}'}"
-                   FontSize="12"
-                   TextColor="Gray" />
-            <Stepper Minimum="0"
-                     Maximum="10"
-                     Increment="1"
-                     Value="{Binding MaxRetries}" />
-
             <!-- Actions -->
             <HorizontalStackLayout Spacing="12" Margin="0,16,0,0">
                 <Button Text="Save Settings"

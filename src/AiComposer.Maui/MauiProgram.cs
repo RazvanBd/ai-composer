@@ -28,6 +28,7 @@ public static class MauiProgram
         // Services — infrastructure
         // -----------------------------------------------------------------------
         builder.Services.AddSingleton<ISettingsService, LocalSettingsService>();
+        builder.Services.AddSingleton<ISecureStorageService, PlatformSecureStorageService>();
         builder.Services.AddSingleton<IWorkspaceService, FileWorkspaceService>();
         builder.Services.AddSingleton<IArtifactsService, FileArtifactsService>();
         builder.Services.AddSingleton<ITicketService, FileTicketService>();

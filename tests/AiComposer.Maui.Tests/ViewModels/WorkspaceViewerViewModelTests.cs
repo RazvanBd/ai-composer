@@ -245,11 +245,11 @@ public sealed class WorkspaceViewerViewModelTests
     }
 
     // ---------------------------------------------------------------------------
-    // OnSelectedFileChanged partial — triggers SelectFileAsync (new in this PR)
+    // OnSelectedFileChanged partial — no longer triggers SelectFileAsync (re-entrancy fix)
     // ---------------------------------------------------------------------------
 
     [Fact]
-    public async Task OnSelectedFileChanged_WhenFileSetToNonNull_LoadsFileContent()
+    public async Task OnSelectedFileChanged_WhenFileSetToNonNull_DoesNotLoadContent()
     {
         var file = new GeneratedFileItem { RelativePath = "a.cs", FullPath = "/full/a.cs" };
         var svc = new FakeOutputService { ContentToReturn = "// hello" };
@@ -257,11 +257,11 @@ public sealed class WorkspaceViewerViewModelTests
 
         vm.SelectedFile = file;
 
-        // Allow the fire-and-forget SelectFileAsync to complete.
+        // Allow any async to complete.
         await Task.Delay(100);
 
-        Assert.Equal("// hello", vm.FileContent);
-        Assert.Equal("/full/a.cs", svc.LastReadPath);
+        // OnSelectedFileChanged is now a no-op — content is only loaded via SelectFileAsync directly.
+        Assert.Null(svc.LastReadPath);
     }
 
     [Fact]
@@ -270,12 +270,10 @@ public sealed class WorkspaceViewerViewModelTests
         var svc = new FakeOutputService { ContentToReturn = "irrelevant" };
         var vm = new WorkspaceViewerViewModel(svc);
 
-        // Set to null — partial method guard `if (value is not null)` should prevent read.
         vm.SelectedFile = null;
 
         await Task.Delay(50);
 
-        // ContentToReturn should not have been fetched.
         Assert.Null(svc.LastReadPath);
     }
 

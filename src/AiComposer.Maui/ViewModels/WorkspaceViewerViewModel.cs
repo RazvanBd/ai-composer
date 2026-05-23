@@ -59,7 +59,7 @@ public sealed partial class WorkspaceViewerViewModel : ObservableObject, IQueryA
         FileContent = await _outputService.ReadFileContentAsync(file.FullPath);
     }
 
-    /// <inheritdoc/>
+    /// <summary>Applies incoming query parameters to initialize or update the view model.</summary>
     void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.TryGetValue("ticketId", out var ticketId))
@@ -73,8 +73,8 @@ public sealed partial class WorkspaceViewerViewModel : ObservableObject, IQueryA
 
     partial void OnSelectedFileChanged(GeneratedFileItem? value)
     {
-        if (value is not null)
-            _ = SelectFileAsync(value);
+        // No-op: selection loading is handled by LoadAndSelectFromQueryAsync
+        // to avoid re-entrant calls from SelectFileAsync setting SelectedFile.
     }
 
     private async Task LoadAndSelectFromQueryAsync()
@@ -86,6 +86,6 @@ public sealed partial class WorkspaceViewerViewModel : ObservableObject, IQueryA
         var matched = GeneratedFiles.FirstOrDefault(file =>
             string.Equals(file.RelativePath, RequestedRelativePath, StringComparison.OrdinalIgnoreCase));
         if (matched is not null)
-            SelectedFile = matched;
+            await SelectFileAsync(matched);
     }
 }

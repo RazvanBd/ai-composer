@@ -5,38 +5,10 @@ namespace AiComposer.Maui.Tests.Models;
 public sealed class AppSettingsTests
 {
     [Fact]
-    public void DefaultAiProvider_IsOpenAi()
+    public void DefaultAiProvider_IsDeepSeek()
     {
         var settings = new AppSettings();
-        Assert.Equal("openai", settings.AiProvider);
-    }
-
-    [Fact]
-    public void DefaultApiKey_IsEmpty()
-    {
-        var settings = new AppSettings();
-        Assert.Equal(string.Empty, settings.ApiKey);
-    }
-
-    [Fact]
-    public void DefaultAutoApprove_IsFalse()
-    {
-        var settings = new AppSettings();
-        Assert.False(settings.AutoApprove);
-    }
-
-    [Fact]
-    public void DefaultTimeoutMinutes_IsThirty()
-    {
-        var settings = new AppSettings();
-        Assert.Equal(30, settings.TimeoutMinutes);
-    }
-
-    [Fact]
-    public void DefaultMaxRetries_IsThree()
-    {
-        var settings = new AppSettings();
-        Assert.Equal(3, settings.MaxRetries);
+        Assert.Equal("deepseek", settings.AiProvider);
     }
 
     [Fact]
@@ -61,63 +33,30 @@ public sealed class AppSettingsTests
     }
 
     [Fact]
-    public void ApiKey_CanBeSetAndRetrieved()
-    {
-        var settings = new AppSettings { ApiKey = "sk-test-key-123" };
-        Assert.Equal("sk-test-key-123", settings.ApiKey);
-    }
-
-    [Fact]
-    public void AutoApprove_CanBeSetToTrue()
-    {
-        var settings = new AppSettings { AutoApprove = true };
-        Assert.True(settings.AutoApprove);
-    }
-
-    [Fact]
-    public void TimeoutMinutes_CanBeSetToCustomValue()
-    {
-        var settings = new AppSettings { TimeoutMinutes = 60 };
-        Assert.Equal(60, settings.TimeoutMinutes);
-    }
-
-    [Fact]
-    public void MaxRetries_CanBeSetToZero()
-    {
-        var settings = new AppSettings { MaxRetries = 0 };
-        Assert.Equal(0, settings.MaxRetries);
-    }
-
-    [Fact]
-    public void MaxRetries_CanBeSetToCustomValue()
-    {
-        var settings = new AppSettings { MaxRetries = 5 };
-        Assert.Equal(5, settings.MaxRetries);
-    }
-
-    [Fact]
     public void AiProvider_CanBeChanged()
     {
-        var settings = new AppSettings { AiProvider = "anthropic" };
-        Assert.Equal("anthropic", settings.AiProvider);
+        var settings = new AppSettings { AiProvider = "copilot" };
+        Assert.Equal("copilot", settings.AiProvider);
     }
 
     [Fact]
-    public void AllNewProperties_CanBeSetTogether()
+    public void AllProperties_CanBeSetTogether()
     {
         var settings = new AppSettings
         {
-            ApiKey = "my-api-key",
-            AutoApprove = true,
-            TimeoutMinutes = 45,
-            MaxRetries = 2,
-            AiProvider = "azure-openai",
+            AiProvider = "copilot",
+            AiModel = "gpt-5",
+            WorkspacePath = "/ws",
+            OutputPath = "/out",
+            CliExecutablePath = "/cli",
+            LiveOutput = false,
         };
 
-        Assert.Equal("my-api-key", settings.ApiKey);
-        Assert.True(settings.AutoApprove);
-        Assert.Equal(45, settings.TimeoutMinutes);
-        Assert.Equal(2, settings.MaxRetries);
-        Assert.Equal("azure-openai", settings.AiProvider);
+        Assert.Equal("copilot", settings.AiProvider);
+        Assert.Equal("gpt-5", settings.AiModel);
+        Assert.Equal("/ws", settings.WorkspacePath);
+        Assert.Equal("/out", settings.OutputPath);
+        Assert.Equal("/cli", settings.CliExecutablePath);
+        Assert.False(settings.LiveOutput);
     }
 }
