@@ -32,12 +32,13 @@ public static class MarkdownLoader
     private static ArtifactNode ParseFile(string path)
     {
         var raw = File.ReadAllText(path);
+        var normalizedRaw = raw.Replace("\r\n", "\n", StringComparison.Ordinal);
         var metadata = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-        var body = raw;
+        var body = normalizedRaw;
 
-        if (raw.StartsWith("---\n", StringComparison.Ordinal))
+        if (normalizedRaw.StartsWith("---\n", StringComparison.Ordinal))
         {
-            var parts = raw.Split(["---\n"], 3, StringSplitOptions.None);
+            var parts = normalizedRaw.Split(["---\n"], 3, StringSplitOptions.None);
             if (parts.Length >= 3)
             {
                 metadata = ParseFrontmatter(parts[1]);

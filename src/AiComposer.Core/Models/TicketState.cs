@@ -15,6 +15,9 @@ public static class TicketState
     /// <summary>Review passed; waiting for QA validation.</summary>
     public const string WaitingForQa = "waiting_for_qa";
 
+    /// <summary>The external agent failed and the ticket needs another coder attempt.</summary>
+    public const string CoderFailed = "coder_failed";
+
     /// <summary>All automated checks passed; PR is ready for human review.</summary>
     public const string ReadyForHumanReview = "ready_for_human_review";
 

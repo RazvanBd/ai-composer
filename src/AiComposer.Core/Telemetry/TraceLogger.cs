@@ -16,6 +16,7 @@ public sealed class TraceLogger
     };
 
     private readonly string _logPath;
+    private readonly object _sync = new();
 
     /// <summary>Initialises the logger and ensures the parent directory exists.</summary>
     public TraceLogger(string logPath)
@@ -29,6 +30,9 @@ public sealed class TraceLogger
     {
         traceEvent.Timestamp = DateTime.UtcNow.ToString("O");
         var line = JsonSerializer.Serialize(traceEvent, JsonOptions);
-        File.AppendAllText(_logPath, line + Environment.NewLine);
+        lock (_sync)
+        {
+            File.AppendAllText(_logPath, line + Environment.NewLine);
+        }
     }
 }

@@ -100,7 +100,7 @@ public sealed class StateStore : IDisposable
     }
 
     /// <inheritdoc/>
-    public void Dispose() { /* connections are opened per-operation */ }
+    public void Dispose() => SqliteConnection.ClearAllPools();
 
     // ── private helpers ────────────────────────────────────────────────────────
 
