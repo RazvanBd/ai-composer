@@ -12,7 +12,7 @@ public sealed partial class ArtifactsExplorerViewModel : ObservableObject
     private readonly IArtifactsService _artifactsService;
 
     [ObservableProperty]
-    private ObservableCollection<ArtifactItem> _artifacts = [];
+    private ObservableCollection<ArtifactGroup> _groupedArtifacts = [];
 
     [ObservableProperty]
     private ArtifactItem? _selectedArtifact;
@@ -29,15 +29,15 @@ public sealed partial class ArtifactsExplorerViewModel : ObservableObject
         _artifactsService = artifactsService;
     }
 
-    /// <summary>Loads all artifacts from the current workspace.</summary>
+    /// <summary>Loads and validates all artifacts from the current workspace, grouped by type.</summary>
     [RelayCommand]
     private async Task LoadArtifactsAsync()
     {
         IsLoading = true;
         try
         {
-            var items = await _artifactsService.LoadArtifactsAsync();
-            Artifacts = new ObservableCollection<ArtifactItem>(items);
+            var items = await _artifactsService.ValidateAsync();
+            GroupedArtifacts = BuildGroups(items);
         }
         finally
         {
@@ -52,4 +52,45 @@ public sealed partial class ArtifactsExplorerViewModel : ObservableObject
         SelectedArtifact = artifact;
         SelectedContent = await _artifactsService.ReadArtifactContentAsync(artifact.FilePath);
     }
+
+    /// <summary>Called when <see cref="SelectedArtifact"/> changes — loads preview content.</summary>
+    partial void OnSelectedArtifactChanged(ArtifactItem? value)
+    {
+        if (value is not null)
+            _ = SelectArtifactAsync(value);
+    }
+
+    // -------------------------------------------------------------------------
+    // Private helpers
+    // -------------------------------------------------------------------------
+
+    private static ObservableCollection<ArtifactGroup> BuildGroups(IReadOnlyList<ArtifactItem> items)
+    {
+        var ordered = items
+            .GroupBy(a => GetGroupTitle(a.Type))
+            .OrderBy(g => GroupOrder(g.Key))
+            .Select(g => new ArtifactGroup(g.Key, g));
+
+        return new ObservableCollection<ArtifactGroup>(ordered);
+    }
+
+    private static string GetGroupTitle(string type) => type.ToLowerInvariant() switch
+    {
+        "project_summary" => "Project Summary",
+        "epic"            => "Epics",
+        "rule"            => "Business Rules",
+        "ticket"          => "Tickets",
+        "adr"             => "ADRs",
+        _                 => "Other",
+    };
+
+    private static int GroupOrder(string groupTitle) => groupTitle switch
+    {
+        "Project Summary" => 0,
+        "Epics"           => 1,
+        "Business Rules"  => 2,
+        "Tickets"         => 3,
+        "ADRs"            => 4,
+        _                 => 99,
+    };
 }

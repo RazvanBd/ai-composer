@@ -19,19 +19,48 @@
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
         </HorizontalStackLayout>
 
-        <!-- Artifact list -->
+        <!-- Grouped artifact list -->
         <CollectionView Grid.Row="1" Grid.Column="0"
-                        ItemsSource="{Binding Artifacts}"
+                        ItemsSource="{Binding GroupedArtifacts}"
+                        IsGrouped="True"
                         SelectionMode="Single"
                         SelectedItem="{Binding SelectedArtifact}">
+
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate x:DataType="models:ArtifactGroup">
+                    <Label Text="{Binding GroupTitle}"
+                           FontSize="11"
+                           FontAttributes="Bold"
+                           TextColor="#374151"
+                           BackgroundColor="#F3F4F6"
+                           Padding="12,6" />
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:ArtifactItem">
-                    <Grid Padding="12,8" ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                        <Label Grid.Column="0" Text="{Binding Type}" FontSize="10"
-                               TextColor="White" BackgroundColor="#6B7280"
-                               Padding="4,2" />
-                        <Label Grid.Column="1" Text="{Binding Title}" FontSize="14"
+                    <Grid Padding="12,8" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Label Grid.Column="0" Text="{Binding Title}"
+                               FontSize="13"
                                LineBreakMode="TailTruncation" />
+                        <Label Grid.Column="1"
+                               Text="{Binding ValidationStatus}"
+                               FontSize="10"
+                               TextColor="White"
+                               Padding="4,2"
+                               VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding ValidationStatus}" Value="Valid">
+                                    <Setter Property="BackgroundColor" Value="#16A34A" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding ValidationStatus}" Value="Invalid">
+                                    <Setter Property="BackgroundColor" Value="#DC2626" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding ValidationStatus}" Value="Unknown">
+                                    <Setter Property="BackgroundColor" Value="#6B7280" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

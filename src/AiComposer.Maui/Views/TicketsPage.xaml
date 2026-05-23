@@ -3,9 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:AiComposer.Maui.ViewModels"
              xmlns:models="clr-namespace:AiComposer.Maui.Models"
+             xmlns:converters="clr-namespace:AiComposer.Maui.Converters"
              x:Class="AiComposer.Maui.Views.TicketsPage"
              x:DataType="vm:TicketsViewModel"
              Title="Tickets">
+
+    <ContentPage.Resources>
+        <converters:TicketStatusToColorConverter x:Key="TicketStatusToColorConverter" />
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*,Auto">
 
@@ -16,7 +21,7 @@
                     BackgroundColor="#2563EB"
                     TextColor="White"
                     CornerRadius="6" />
-            <Button Text="Run Selected"
+            <Button Text="▶ Run Selected"
                     Command="{Binding RunSelectedTicketCommand}"
                     BackgroundColor="#16A34A"
                     TextColor="White"
@@ -32,14 +37,24 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:TicketItem">
                     <Grid Padding="12,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                        <Label Grid.Column="0" Text="{Binding Id}"
-                               FontAttributes="Bold" FontSize="13" TextColor="#374151" />
-                        <Label Grid.Column="1" Text="{Binding Title}"
-                               FontSize="13" LineBreakMode="TailTruncation" />
-                        <Label Grid.Column="2" Text="{Binding State}"
-                               FontSize="11" TextColor="White"
-                               BackgroundColor="#6B7280"
-                               Padding="6,2" />
+                        <Label Grid.Column="0"
+                               Text="{Binding Id}"
+                               FontAttributes="Bold"
+                               FontSize="13"
+                               TextColor="#374151"
+                               VerticalOptions="Center" />
+                        <Label Grid.Column="1"
+                               Text="{Binding Title}"
+                               FontSize="13"
+                               LineBreakMode="TailTruncation"
+                               VerticalOptions="Center" />
+                        <Label Grid.Column="2"
+                               Text="{Binding State}"
+                               FontSize="11"
+                               TextColor="White"
+                               BackgroundColor="{Binding State, Converter={StaticResource TicketStatusToColorConverter}}"
+                               Padding="8,3"
+                               VerticalOptions="Center" />
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

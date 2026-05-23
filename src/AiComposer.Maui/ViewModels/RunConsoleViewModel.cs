@@ -6,7 +6,7 @@ using AiComposer.Maui.Services.Abstractions;
 namespace AiComposer.Maui.ViewModels;
 
 /// <summary>ViewModel for the Run Console page — live output streaming and run control.</summary>
-public sealed partial class RunConsoleViewModel : ObservableObject
+public sealed partial class RunConsoleViewModel : ObservableObject, IQueryAttributable
 {
     private readonly IRunService _runService;
 
@@ -14,10 +14,19 @@ public sealed partial class RunConsoleViewModel : ObservableObject
     private ObservableCollection<string> _outputLines = [];
 
     [ObservableProperty]
-    private bool _isRunning;
+    [NotifyPropertyChangedFor(nameof(IsRunning))]
+    [NotifyCanExecuteChangedFor(nameof(StartRunCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StopRunCommand))]
+    private RunStatus _runStatus = RunStatus.Idle;
 
     [ObservableProperty]
     private string _ticketId = string.Empty;
+
+    [ObservableProperty]
+    private string _selectedTicketTitle = string.Empty;
+
+    /// <summary>Gets whether a run is currently in progress.</summary>
+    public bool IsRunning => RunStatus == RunStatus.Running;
 
     /// <summary>Initialises <see cref="RunConsoleViewModel"/> and subscribes to run events.</summary>
     public RunConsoleViewModel(IRunService runService)
@@ -27,12 +36,25 @@ public sealed partial class RunConsoleViewModel : ObservableObject
         _runService.RunCompleted += OnRunCompleted;
     }
 
+    /// <inheritdoc/>
+    void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.TryGetValue("ticketId", out var id))
+            TicketId = id?.ToString() ?? string.Empty;
+        if (query.TryGetValue("ticketTitle", out var title))
+            SelectedTicketTitle = title?.ToString() ?? string.Empty;
+
+        // If a run was already started externally (e.g., from the Tickets page), reflect that.
+        if (_runService.IsRunning && RunStatus == RunStatus.Idle)
+            RunStatus = RunStatus.Running;
+    }
+
     /// <summary>Starts a CLI run for the configured ticket ID.</summary>
     [RelayCommand(CanExecute = nameof(CanStartRun))]
     private async Task StartRunAsync()
     {
         OutputLines.Clear();
-        IsRunning = true;
+        RunStatus = RunStatus.Running;
         await _runService.StartRunAsync(TicketId);
     }
 
@@ -41,6 +63,7 @@ public sealed partial class RunConsoleViewModel : ObservableObject
     private void StopRun()
     {
         _runService.StopRun();
+        RunStatus = RunStatus.Stopped;
     }
 
     /// <summary>Clears all output lines.</summary>
@@ -59,7 +82,9 @@ public sealed partial class RunConsoleViewModel : ObservableObject
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            IsRunning = false;
+            // Preserve Stopped if the user explicitly stopped the run.
+            if (RunStatus != RunStatus.Stopped)
+                RunStatus = exitCode == 0 ? RunStatus.Completed : RunStatus.Failed;
             OutputLines.Add($"[Process exited with code {exitCode}]");
         });
     }
